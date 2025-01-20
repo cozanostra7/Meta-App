@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render,redirect
 from .models import *
 from django.contrib.auth import login,authenticate,logout
-from .forms import LoginForm,RegisterForm
+from .forms import LoginForm,RegisterForm,ProfileForm
 from django import forms
 from django.contrib import messages
 
@@ -50,13 +50,16 @@ def registerUser(request):
     if request.method=='POST':
         form=RegisterForm(data=request.POST)
         if form.is_valid():
+            user=form.save(commit=False)
+            user.username = user.username.lower()
             user=form.save()
+
             messages.success(request, 'Registration completed')
-            return redirect('login')
+            return redirect('edit-account')
         else:
             for field in form.errors:
                 messages.error(request, form.errors[field].as_text())
-            return redirect('register')
+            return redirect('login')
 
     else:
         form=RegisterForm()
@@ -102,3 +105,17 @@ def userAccount(request):
               'projects':projects
               }
     return render(request,'users/account.html',context)
+
+
+@login_required(login_url='login')
+def editAccount(request):
+
+    profile = request.user.profile
+    form = ProfileForm(instance=profile)
+    if request.method=='POST':
+        form = ProfileForm(request.POST,request.FILES,instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('account')
+    context = {'form':form}
+    return render(request,'users/profile_form.html',context)

@@ -4,7 +4,6 @@ from django import forms
 from .models import *
 
 
-
 class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={
         'class':'input'
@@ -37,3 +36,9 @@ class RegisterForm(UserCreationForm):
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
 
+
+class ProfileForm(ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['name','email','username','location','bio',
+                  'short_intro','profile_image','social_github']
