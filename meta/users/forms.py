@@ -42,3 +42,17 @@ class ProfileForm(ModelForm):
         model = Profile
         fields = ['name','email','username','location','bio',
                   'short_intro','profile_image','social_github']
+
+
+
+class SkillForm(ModelForm):
+    class Meta:
+        model = Skills
+        fields = '__all__'
+        exclude = ['owner'] # exlcudes the field mentioned in it
+
+    def __init__(self,*args,**kwargs):
+        super(SkillForm,self).__init__(*args,**kwargs)
+
+        for name,field in self.fields.items():
+            field.widget.attrs.update({'class':'input'})

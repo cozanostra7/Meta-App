@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render,redirect
 from .models import *
 from django.contrib.auth import login,authenticate,logout
-from .forms import LoginForm,RegisterForm,ProfileForm
+from .forms import LoginForm,RegisterForm,ProfileForm, SkillForm
 from django import forms
 from django.contrib import messages
 
@@ -119,3 +119,45 @@ def editAccount(request):
             return redirect('account')
     context = {'form':form}
     return render(request,'users/profile_form.html',context)
+
+
+@login_required(login_url='login')
+def createSkills(request):
+    profile=request.user.profile # TODO assossiates the skill with the profile, gives the skill to the requested profile
+    form = SkillForm()
+    if request.method == 'POST':
+        form=SkillForm(request.POST)
+        if form.is_valid():
+            skill = form.save(commit=False)
+            skill.owner = profile
+            skill.save()
+            messages.success(request, 'Skill has been added successfully!')
+            return redirect('account')
+    context = {'form':form}
+    return render(request,'users/skill_form.html',context)
+
+
+@login_required(login_url='login')
+def updateSkills(request,pk):
+    profile=request.user.profile # TODO associates the skill with the profile, gives the skill to the requested profile
+    skill = profile.skills_set.get(pk=pk)
+    form = SkillForm(instance=skill)
+    if request.method == 'POST':
+        form=SkillForm(request.POST,instance=skill)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Skill has been updated! ')
+            return redirect('account')
+    context = {'form':form}
+    return render(request,'users/skill_form.html',context)
+
+@login_required(login_url='login')
+def deleteSkills(request,pk):
+    profile= request.user.profile
+    skill = profile.skills_set.get(pk=pk)
+    if request.method=='POST':
+        skill.delete()
+        messages.success(request, 'Skill has been deleted! ')
+        return redirect('account')
+    context = {'skill':skill}
+    return render(request,'users/delete_skill.html',context)
